@@ -104,6 +104,16 @@ struct Reloc_info
 
 #pragma region ENUMS
 
+
+enum class Calling_covention
+{
+	call_cdecl,
+	call_stdcall,
+	call_fastcall,
+	call_thiscall,
+	call_vectorcall
+};
+
 enum class Directory_type
 {
 	import_dir,

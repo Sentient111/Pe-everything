@@ -28,6 +28,13 @@ public:
 	UINT64 Read(UINT64 addr, size_t size);
 
 	bool Get_address_info(UINT64 addr, OPTIONAL std::string* module_path, OPTIONAL UINT64* offset = 0);
+	//oh blyat
+
+
+
+	template <typename Ret_type, typename ...Args>	
+	Ret_type Call_shellcode(PVOID shellcode, Args... args);
+	 
 
 #pragma region Getters
 	std::string Get_path() { return source_file_path; };
@@ -61,6 +68,17 @@ private:
 	HANDLE process_handle = INVALID_HANDLE_VALUE;
 	DWORD pid;
 
+
+	//call
+	inline void Encode_value(std::vector<BYTE>& shellcode, UINT32 val);
+	inline void Encode_value(std::vector<BYTE>& shellcode, UINT64 val);
+	inline void Create_push64(std::vector<BYTE>& shellcode, UINT64 val);
+	inline void Create_push32(std::vector<BYTE>& shellcode, UINT32 val);
+	inline void Create_call(std::vector<BYTE>& shellcode, UINT64 addr);
+
+	template <typename ...Args>
+	bool Create_call_shellcode(std::vector<BYTE>& shellcode, Calling_covention convention, UINT64 addr, Args... args);
+
 	DWORD Get_pid_by_name(const std::string& name); //Process.cpp
 	std::string Get_full_module_name(const std::string& name);
 	bool Get_mod_infoEx(const std::string& module_name, OPTIONAL UINT64* base = 0, OPTIONAL std::string* path = 0);
@@ -87,6 +105,116 @@ private:
 	//extra functionality
 	Nt* nt = nullptr;
 };
+
+template <typename Ret_type, typename ...Args>
+Ret_type Pe::Call_shellcode(PVOID shellcode, Args... args)
+{
+	//create thread/create remotethread or some shit ree
+}
+
+template <typename ...Args>
+bool Pe::Create_call_shellcode(std::vector<BYTE>& shellcode, Calling_covention convention, UINT64 addr, Args... args)
+{
+	int curr_arg = 1;
+	DWORD stack_arg_size = 0;
+	for (const auto arg : { args... })
+	{
+		switch (curr_arg)
+		{
+		case 1:
+		{
+			if (is_32_bit)
+				if (convention == Calling_covention::call_stdcall || convention == Calling_covention::call_cdecl)
+					goto NORMAL_PUSH;
+
+			if (is_32_bit)
+			{
+				shellcode.push_back(0xb9); //mov ecx,
+				Encode_value(shellcode, (UINT32)arg);
+			}
+			else
+			{
+				shellcode.push_back(0x48); shellcode.push_back(0xb9);//movabs rcx,
+				Encode_value(shellcode, (UINT64)arg);
+			}
+			curr_arg++;
+			continue;
+		}
+		case 2:
+		{
+			if (is_32_bit && convention == Calling_covention::call_fastcall)
+			{
+				shellcode.push_back(0xba);
+				Encode_value(shellcode, (UINT32)arg);
+				curr_arg++;
+				continue;
+			}
+
+			if (is_32_bit)
+				goto NORMAL_PUSH;
+
+			shellcode.push_back(0x48); shellcode.push_back(0xba); //movabs rdx,
+			Encode_value(shellcode, (UINT64)arg);
+			curr_arg++;
+			continue;
+
+		}
+		case 3:
+		{
+			if (is_32_bit)
+				goto NORMAL_PUSH;
+
+			shellcode.push_back(0x49); shellcode.push_back(0xb8); //movabs r8,
+			Encode_value(shellcode, (UINT64)arg);
+			curr_arg++;
+			continue;
+		}
+		case 4:
+		{
+			if (is_32_bit)
+				goto NORMAL_PUSH;
+			shellcode.push_back(0x49); shellcode.push_back(0xb9); //movabs r9,
+			Encode_value(shellcode, (UINT64)arg);
+			curr_arg++;
+			continue;
+		}
+
+		default:
+		{
+		NORMAL_PUSH:
+			if (is_32_bit)
+			{
+				Create_push32(shellcode, (UINT32)arg);
+				stack_arg_size += sizeof(UINT32);
+			}
+			else
+			{
+				Create_push64(shellcode, (UINT64)arg);
+				stack_arg_size += sizeof(UINT64);
+			}
+
+			curr_arg++;
+			continue;
+		}
+		}
+	}
+
+
+	Create_call(shellcode, is_32_bit, addr);
+
+	if (stack_arg_size && convention == Calling_covention::call_cdecl) //caller needs to clean stack
+	{
+		if (!is_32_bit)
+			shellcode.push_back(0x48); //REX.W
+
+		shellcode.push_back(0x83); shellcode.push_back(0xc4); //add rsp, 
+		shellcode.push_back(stack_arg_size);
+
+	}
+
+	shellcode.push_back(0xC3);//ret
+	return true;
+}
 
 template <typename char_type>
 char_type* Pe::Read_string(char_type* addr)

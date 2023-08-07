@@ -57,6 +57,9 @@
     <ClCompile Include="SystemInfo.cpp">
       <Filter>Header Files\PE\PeUtil</Filter>
     </ClCompile>
+    <ClCompile Include="Call.cpp">
+      <Filter>Header Files\PE\PeUtil</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Pe.h">

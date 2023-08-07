@@ -11,34 +11,18 @@
 
 int main()
 {
-	Pe myPe{}; //"win32k.sys", "", true
-	if (!myPe.Success())
+	Pe steam{"", "steam.exe"};
+	if (!steam.Success())
 	{
-		printf("Failed to init my pe %X, comment %s\n", myPe.Get_error(), myPe.Get_error_comment()->c_str());
+		printf("Failed to init steam %X, comment %s\n", steam.Get_error(), steam.Get_error_comment()->c_str());
 		return 1;
 	}
 
-	Nt* nt_data = myPe.Get_nt();
-	if (!nt_data->Success())
-		return 0;
-
-
-	Import_info imports = { 0 };
-	nt_data->Get_import_dir(&imports);
-	if (!nt_data->Success())
-		return 0;
-
-	Export_info exports = { 0 };
-	nt_data->Get_export_dir(&exports);
-	if (!nt_data->Success())
-		return 0;
-
-	if (!nt_data->Is_missing_relocs())
+	Pe dll("C:\\Users\\sentient\\Documents\\GitHub\\Vac3SteamBypass\\Release\\Vac3SteamBypass.dll");
+	if (!dll.Success())
 	{
-		Reloc_info relocs = { 0 };
-		nt_data->Get_reloc_dir(&relocs); //fucked for drivers
-		if (!nt_data->Success())
-			return 0;
+		printf("Failed to init dll %X, comment %s\n", dll.Get_error(), dll.Get_error_comment()->c_str());
+		return 1;
 	}
 
 	return 0;

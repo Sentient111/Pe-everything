@@ -41,6 +41,7 @@ public:
 	DWORD Get_error() { return last_err; };
 	bool Success() { return  Get_error() == ERROR_SUCCESS; };
 	std::string* Get_error_comment() { return &error_comment; };
+	bool Is_32_bit() { return is_32_bit; };
 
 private:
 

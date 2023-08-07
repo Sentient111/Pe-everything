@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Call.cpp" />
     <ClCompile Include="Directories.cpp" />
     <ClCompile Include="Files.cpp" />
     <ClCompile Include="Memory.cpp" />
