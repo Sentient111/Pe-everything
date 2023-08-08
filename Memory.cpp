@@ -25,3 +25,49 @@ UINT64 Process::Read(UINT64 addr, size_t size)
 }
 
 
+UINT64 Process::Copy_data(UINT64 data, size_t size)
+{
+	if (is_local_context)
+		return data;
+
+	PVOID allocated_mem = VirtualAllocEx(process_handle, NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+	if (!allocated_mem)
+	{
+		error->last_err = GetLastError();
+		error->error_comment = CREATE_ERROR("Failed to alloc mem %X\n", GetLastError());
+		return 0;
+	}
+
+	if (!WriteProcessMemory(process_handle, allocated_mem, (LPVOID)data, size, NULL))
+	{
+		error->last_err = GetLastError();
+		error->error_comment = CREATE_ERROR("Failed to copy mem %X\n", GetLastError());
+		return 0;
+	}
+
+	return (UINT64)allocated_mem;
+}
+
+UINT64 Process::Allocate_mem(size_t size, DWORD prot)
+{
+	UINT64 base = (UINT64)VirtualAllocEx(process_handle, NULL, size, MEM_COMMIT | MEM_RESERVE, prot);
+	if (!base)
+	{
+		error->last_err = GetLastError();
+		error->error_comment = CREATE_ERROR("Failed to alloc mem %X\n", GetLastError());
+		return 0;
+	}
+	return base;
+}
+
+bool Process::Copy_data(UINT64 source, UINT64 dest, size_t size)
+{
+	if (!WriteProcessMemory(process_handle, (PVOID)dest, (PVOID)source, size, NULL))
+	{
+		error->last_err = GetLastError();
+		error->error_comment = CREATE_ERROR("Failed to alloc mem %X\n", GetLastError());
+		return false;
+	}
+
+	return true;
+}

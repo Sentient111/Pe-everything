@@ -32,7 +32,7 @@ DWORD Process::Get_pid_by_name(const std::string& name)
 
 	while (Process32NextW(proc_list, &current_entry))
 	{
-		if (!lstrcmpW(proc_name.c_str(), current_entry.szExeFile))
+		if (Str_cmp((WCHAR*)proc_name.c_str(), current_entry.szExeFile))
 		{
 			CloseHandle(proc_list);
 			return current_entry.th32ProcessID;

@@ -37,8 +37,13 @@ Process::Process(Error_struct* error_handeling, const OPTIONAL std::string& proc
 	}
 	is_32_bit = is_wow_64;
 
-
-	if (!Get_mod_infoEx(process, 0, &process_path))
+	char full_path[MAX_PATH] = { 0 };
+	if (!K32GetModuleFileNameExA(process_handle, NULL, (LPSTR)&full_path, sizeof(full_path)))
+	{
+		error->last_err = GetLastError();
+		error->error_comment = CREATE_ERROR("failed to get full process path %X\n", error->last_err);
 		return;
+	}
+	process_path = full_path;
 	process_name = process_path.substr(process_path.find_last_of('\\') + 1);
 }

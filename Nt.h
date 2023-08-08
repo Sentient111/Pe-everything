@@ -36,10 +36,30 @@ public:
 		else
 			return nt_64_headers->OptionalHeader.ImageBase;
 	}
+
+	UINT64 Get_image_size()
+	{
+		if (is_32_bit)
+			return nt_32_headers->OptionalHeader.SizeOfImage;
+		else
+			return nt_64_headers->OptionalHeader.SizeOfImage;
+	}
+
+	UINT64 Get_entry_routine()
+	{
+		if (is_32_bit)
+			return nt_32_headers->OptionalHeader.AddressOfEntryPoint;
+		else
+			return nt_64_headers->OptionalHeader.AddressOfEntryPoint;
+	}
+
 	Execution_enviornment Get_execution_enviornment();
 	Subsystem_target Get_subsystem_target();
 
 	bool Is_32_bit() { return is_32_bit; };
+
+	UINT64 Relocate_image(UINT64 new_base);
+	bool Resolve_imports(UINT64 base, Pe* process);
 
 private:
 

@@ -35,7 +35,7 @@ Nt::Nt(Error_struct* error_handeling, Pe* executable)
 			return;
 
 		nt_64_headers = 0;
-		if (nt_32_headers->Signature != 0x50450000)
+		if (nt_32_headers->Signature != 0x00004550)
 		{
 			error->last_err = ERROR_INVALID_EXE_SIGNATURE;
 			error->error_comment = CREATE_ERROR("nt headers has wrong signature. Probably bad nt header offset\n");

@@ -79,10 +79,14 @@ void Pe::Init_foreign_pe(const std::string& process_name, const std::string& mod
 	if (!error->Success()) //copy error from process to Pe
 		return;
 
-	if (!proc->Get_mod_infoEx(module_name, &base_adress, &source_file_path))
+	if (module_name.size() != 0)
+		file_name = module_name;
+	else
+		file_name = process_name;
+
+	if (!proc->Get_mod_infoEx(file_name, &base_adress, &source_file_path))
 		return;
 
-	file_name = module_name;
 	error->last_err = ERROR_SUCCESS;
 }
 
@@ -117,7 +121,7 @@ Pe::Pe(Error_struct* error_handeling, const std::string& pe_identifier, const st
 
 	else if (owner_process_name.length() == 0) //local module or process
 		Init_local_pe(pe_identifier);
-	
+
 	else //other process or process module 
 		Init_foreign_pe(owner_process_name, pe_identifier);
 
@@ -129,8 +133,33 @@ Pe::~Pe()
 	if (pe_type == Pe_type::pe_file)
 		file_stream.close();
 
-	if(nt)
+	if (nt)
 		delete nt;
-	if(proc)
+	if (proc)
 		delete proc;
+}
+
+Pe* Pe::Get_module(const std::string& name, OPTIONAL Error_struct* error_handler )
+{
+	if (!error_handler)
+		error_handler = error;
+
+	switch (pe_type)
+	{
+		case Pe_type::pe_foreign:
+			return new Pe(error_handler, name, proc->Get_process_name());
+		
+		case Pe_type::pe_local:
+			return new Pe(error_handler, name);
+
+		default:
+		case Pe_type::pe_unknown:
+		case Pe_type::pe_file:
+		case Pe_type::pe_driver:
+		{
+			error_handler->last_err = ERROR_INVALID_FUNCTION;
+			error_handler->error_comment = CREATE_ERROR("Invalid use\n");
+			return 0;
+		}
+	}
 }

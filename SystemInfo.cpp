@@ -66,7 +66,7 @@ bool Pe::Get_driver_info(IN const std::string& name, OPTIONAL std::string* path,
             std::string driver_path = (char*)module_information->Module[i].FullPathName;
             const char system_root_str[] = "\\SystemRoot";
 
-            if (memcmp(driver_path.c_str(), system_root_str, sizeof(system_root_str) - 1) == 0)
+            if (!memcmp(driver_path.c_str(), system_root_str, sizeof(system_root_str) - 1))
             {
                 std::string system_dir = "";
                 if (Get_system_dir(&system_dir))

@@ -27,13 +27,14 @@ public:
 	char_type* Read_string(char_type* addr);
 
 	UINT64 Read(UINT64 addr, size_t size);
-
+	Pe* Get_module(const std::string& name, OPTIONAL Error_struct* error_handler = 0);
 
 
 #pragma region Getters
 	std::string Get_path() { return source_file_path; };
 	std::string Get_name() { return file_name; };
 	Nt* Get_nt() { if (!nt) nt = new Nt(error, this); return nt; };
+	Process* Get_proc() { return proc; };
 	Pe_type Get_pe_type() { return pe_type; };
 	UINT64 Get_real_base() { return base_adress; };
 #pragma endregion

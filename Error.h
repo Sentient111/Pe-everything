@@ -24,6 +24,22 @@ std::string Format_string(const std::string& format, Args ... args)
 	std::snprintf(buf.get(), size_s, format.c_str(), args ...);
 	return std::string(buf.get(), buf.get() + size_s - 1); //remove null term
 }
+
+template <typename Char_type = char>
+bool Str_cmp(Char_type* str1, Char_type* str2)
+{
+	for (size_t i = 0; i < MAX_PATH +1 ; i++)
+	{
+		if (str1[i] == 0 || str2[i] == 0)
+			return true;
+
+		if (std::tolower((int)str1[i]) != std::tolower((int)str2[i]))
+			return false;
+	}
+	return true;
+}
+
+
 // '/' for linux
 #define __FILENAME__ (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__) //removes the whole path from __file__ so only the filename shows up
 

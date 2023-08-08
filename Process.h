@@ -16,6 +16,16 @@ public:
 	bool Get_mod_infoEx(const std::string& module_name, OPTIONAL UINT64* base = 0, OPTIONAL std::string* path = 0);
 	bool Get_address_info(UINT64 addr, OPTIONAL std::string* module_path, OPTIONAL UINT64* offset);
 
+
+	UINT64 Copy_data(UINT64 data, size_t size);
+	bool Copy_data(UINT64 source, UINT64 dest, size_t size);
+	UINT64 Allocate_mem(size_t size, DWORD prot);
+
+	template <typename Ret_type, typename ...Args>
+	Ret_type Call_function(Calling_covention convention, UINT64 addr, Args... args);
+
+	std::string Get_process_name() {return process_name;};
+
 private:
 
 	HANDLE process_handle;
@@ -34,11 +44,11 @@ private:
 	template <typename ...Args>
 	bool Create_call_shellcode(std::vector<BYTE>& shellcode, Calling_covention convention, UINT64 addr, Args... args);
 
-	inline void Encode_value(std::vector<BYTE>& shellcode, UINT32 val);
-	inline void Encode_value(std::vector<BYTE>& shellcode, UINT64 val);
-	inline void Create_push64(std::vector<BYTE>& shellcode, UINT64 val);
-	inline void Create_push32(std::vector<BYTE>& shellcode, UINT32 val);
-	inline void Create_call(std::vector<BYTE>& shellcode, UINT64 addr);
+	void Encode_value(std::vector<BYTE>& shellcode, UINT32 val);
+	void Encode_value(std::vector<BYTE>& shellcode, UINT64 val);
+	void Create_push64(std::vector<BYTE>& shellcode, UINT64 val);
+	void Create_push32(std::vector<BYTE>& shellcode, UINT32 val);
+	void Create_call(std::vector<BYTE>& shellcode, UINT64 addr);
 };
 
 
@@ -81,6 +91,69 @@ char_type* Process::Read_string(char_type* addr)
 
 	//string exeeded max string len so it is most likeley a invalid string
 	return NULL;
+}
+
+
+template <typename Ret_type, typename ...Args>
+Ret_type Process::Call_function(Calling_covention convention, UINT64 addr, Args... args)
+{
+	if (is_local_context)
+	{
+		switch(convention)
+		{
+			case Calling_covention::call_cdecl:
+				return ((Ret_type(__cdecl*)(Args...))addr)(args...);
+
+			case Calling_covention::call_stdcall:
+				return ((Ret_type(__stdcall*)(Args...))addr)(args...);
+
+			case Calling_covention::call_fastcall:
+				return ((Ret_type(__fastcall*)(Args...))addr)(args...);
+
+			case Calling_covention::call_thiscall:
+				return ((Ret_type(__thiscall*)(Args...))addr)(args...);
+
+			case Calling_covention::call_vectorcall:
+				return ((Ret_type(__vectorcall*)(Args...))addr)(args...);
+
+			default:
+				break;
+		}
+	}
+	else
+	{
+		std::vector<BYTE> call_shellcode;
+		if (!Create_call_shellcode(call_shellcode, convention, addr, args...))
+			return Ret_type{ 0 };
+
+		PVOID exec = VirtualAllocEx(process_handle, NULL, call_shellcode.size(), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+		if (!exec)
+			return Ret_type{ 0 };
+
+		if (!WriteProcessMemory(process_handle, exec, &call_shellcode[0], call_shellcode.size(), NULL))
+		{
+			error->last_err = GetLastError();
+			error->error_comment = CREATE_ERROR("Failed to wpm %X\n", GetLastError());
+			return Ret_type{ 0 };
+		}
+
+		HANDLE thread_handle = CreateRemoteThread(process_handle, NULL, NULL, (LPTHREAD_START_ROUTINE)exec, NULL, NULL, NULL);
+		if (!thread_handle || thread_handle == INVALID_HANDLE_VALUE)
+		{
+			error->last_err = GetLastError();
+			error->error_comment = CREATE_ERROR("Failed to create thread %X\n", GetLastError());
+			return Ret_type{ 0 };
+		}
+
+		if (WaitForSingleObject(thread_handle, 1000) != WAIT_OBJECT_0)
+		{
+			error->last_err = GetLastError();
+			error->error_comment = CREATE_ERROR("thread failed to execute in time. something went wrong %X\n", GetLastError());
+			return Ret_type{ 0 };
+		}
+
+		VirtualFree(exec, NULL, MEM_RELEASE);
+	}
 }
 
 
@@ -173,7 +246,7 @@ bool Process::Create_call_shellcode(std::vector<BYTE>& shellcode, Calling_covent
 	}
 
 
-	Create_call(shellcode, is_32_bit, addr);
+	Create_call(shellcode, addr);
 
 	if (stack_arg_size && convention == Calling_covention::call_cdecl) //caller needs to clean stack
 	{

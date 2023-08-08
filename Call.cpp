@@ -1,6 +1,6 @@
 #include "Pe.h"
 
-inline void Process::Encode_value(std::vector<BYTE>& shellcode, UINT32 val)
+void Process::Encode_value(std::vector<BYTE>& shellcode, UINT32 val)
 {
 	BYTE* val_ptr = (BYTE*)&val;
 	for (size_t i = 0; i < sizeof(UINT32); i++)
@@ -8,7 +8,7 @@ inline void Process::Encode_value(std::vector<BYTE>& shellcode, UINT32 val)
 		shellcode.push_back(val_ptr[i]);
 	}
 }
-inline void Process::Encode_value(std::vector<BYTE>& shellcode, UINT64 val)
+void Process::Encode_value(std::vector<BYTE>& shellcode, UINT64 val)
 {
 	BYTE* val_ptr = (BYTE*)&val;
 	for (size_t i = 0; i < sizeof(UINT64); i++)
@@ -17,20 +17,20 @@ inline void Process::Encode_value(std::vector<BYTE>& shellcode, UINT64 val)
 	}
 }
 
-inline void Process::Create_push64(std::vector<BYTE>& shellcode, UINT64 val)
+void Process::Create_push64(std::vector<BYTE>& shellcode, UINT64 val)
 {
 	shellcode.push_back(0x48); shellcode.push_back(0xb8); //movabs rax,
 	Encode_value(shellcode, val);
 	shellcode.push_back(0x50);//push rax
 }
 
-inline void Process::Create_push32(std::vector<BYTE>& shellcode, UINT32 val)
+void Process::Create_push32(std::vector<BYTE>& shellcode, UINT32 val)
 {
 	shellcode.push_back(0x68); //push
 	Encode_value(shellcode, val);
 }
 
-inline void Process::Create_call(std::vector<BYTE>& shellcode, UINT64 addr)
+void Process::Create_call(std::vector<BYTE>& shellcode, UINT64 addr)
 {
 	if (is_32_bit)
 	{

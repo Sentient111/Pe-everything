@@ -75,6 +75,9 @@
     <ClCompile Include="Copy.cpp">
       <Filter>Header Files\PE\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="ManualMap.cpp">
+      <Filter>Header Files\PE\NtUtil</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Process.h">
