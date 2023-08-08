@@ -1,5 +1,6 @@
 #pragma once
 #include "Error.h"
+#include "Copy.h"
 #include <vector>
 
 class Pe;

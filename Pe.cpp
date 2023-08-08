@@ -1,16 +1,45 @@
 #include "Pe.h"
 
+std::string Pe::Get_full_module_name(const std::string& name)
+{
+	RESET_ERR();
+
+	char full_module_path[260] = { 0 };
+
+	if (name.length() == 0)
+	{
+		if (!GetModuleFileNameA(NULL, (LPSTR)&full_module_path, sizeof(full_module_path)))
+		{
+			last_err = GetLastError();
+			error_comment = CREATE_ERROR("Failed to get full path for local process with err %X\n", last_err);
+			return "";
+		}
+	}
+	else
+	{
+		if (!GetModuleFileNameA(LoadLibraryA(name.c_str()), (LPSTR)&full_module_path, sizeof(full_module_path)))
+		{
+			last_err = GetLastError();
+			error_comment = CREATE_ERROR("Failed to get full path for local module %s with err %X\n", name.c_str(), last_err);
+			return "";
+		}
+	}
+
+
+	return full_module_path;
+}
+
+
 void Pe::Init_local_pe(const std::string& module_name)
 {
 	pe_type = Pe_type::pe_local;
 
-	pid = GetCurrentProcessId();
-	process_handle = GetCurrentProcess();
+	proc = new Process();
+	if (!proc->Success()) //copy error from process to Pe
+		return;
 
 	source_file_path = Get_full_module_name(module_name);
 	file_name = module_name;
-	owner_process_path = Get_full_module_name("");
-	owner_process_name = owner_process_path.substr(owner_process_path.find_last_of("\\"));
 
 	base_adress = (UINT64)GetModuleHandleA(module_name.c_str());
 	if (!base_adress)
@@ -27,13 +56,8 @@ void Pe::Init_file_pe(const std::string& file_path)
 {
 	pe_type = Pe_type::pe_file;
 
-	pid = 0;
-	process_handle = INVALID_HANDLE_VALUE;
-
 	source_file_path = file_path;
 	file_name = source_file_path.substr(source_file_path.find_last_of("\\") + 1);
-	owner_process_name = "";
-	owner_process_path = "";
 
 	file_stream.open(file_path, std::ios::binary);
 	if (!file_stream.is_open())
@@ -51,35 +75,14 @@ void Pe::Init_foreign_pe(const std::string& process_name, const std::string& mod
 {
 	pe_type = Pe_type::pe_foreign;
 
-	pid = Get_pid_by_name(process_name);
-	if (!pid)
+	proc = new Process(process_name);
+	if (!proc->Success()) //copy error from process to Pe
 		return;
 
-	process_handle = OpenProcess(PROCESS_ALL_ACCESS, false, pid);
-	if (INVALID_HANDLE(process_handle))
-	{
-		last_err = GetLastError();
-		error_comment = CREATE_ERROR("Invalid process handle %X\n", GetLastError());
-		return;
-	}
-
-	if (module_name.length() == 0)
-	{
-		file_name = process_name;
-		if (!Get_mod_infoEx(process_name, &base_adress, &source_file_path))
-			return;
-	}
-	else
-	{
-		file_name = module_name;
-		if (!Get_mod_infoEx(module_name, &base_adress, &source_file_path))
-			return;
-	}
-
-	owner_process_name = process_name;
-	if (!Get_mod_infoEx(process_name, NULL, &owner_process_path))
+	if (!proc->Get_mod_infoEx(module_name, &base_adress, &source_file_path))
 		return;
 
+	file_name = module_name;
 	last_err = ERROR_SUCCESS;
 }
 
@@ -124,8 +127,9 @@ Pe::~Pe()
 	RESET_ERR();
 	if (pe_type == Pe_type::pe_file)
 		file_stream.close();
-	else
-		CloseHandle(process_handle);
 
-	delete nt;
+	if(nt)
+		delete nt;
+	if(proc)
+		delete proc;
 }

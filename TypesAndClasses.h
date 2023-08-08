@@ -23,7 +23,6 @@
 
 #define MAX_QUERY_TRIES 5
 #define RESET_ERR() last_err = ERROR_SUCCESS;error_comment = "";
-#define IN_BOUNDS(s1,e1,s2,e2) s1 >= s2 && s2+e2 >= s1+e1
 #define MAX_STR_READ_LEN 260
 #define File_read(addr, size, buff) file_stream.seekg(addr); file_stream.read((char*)buff, size)
 #define INIT_USTRING(string) string.Buffer = string.str; string.Length = 0; string.MaximumLength = sizeof(string.str);
@@ -58,13 +57,6 @@ typedef struct _SYSTEM_MODULE_INFORMATION {
 	ULONG Count;
 	SYSTEM_MODULE_ENTRY Module[1];
 } SYSTEM_MODULE_INFORMATION, * PSYSTEM_MODULE_INFORMATION;
-
-struct Local_copy_list
-{
-	UINT64 orig_addr;
-	UINT64 local_addr;
-	size_t size;
-};
 
 struct Import_functions
 {

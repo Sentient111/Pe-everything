@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Call.cpp" />
+    <ClCompile Include="Copy.cpp" />
     <ClCompile Include="Directories.cpp" />
     <ClCompile Include="Files.cpp" />
     <ClCompile Include="Memory.cpp" />
@@ -149,13 +150,17 @@
     <ClCompile Include="Pe.cpp" />
     <ClCompile Include="Platform.cpp" />
     <ClCompile Include="Process.cpp" />
+    <ClCompile Include="ProcessUtils.cpp" />
+    <ClCompile Include="Read.cpp" />
     <ClCompile Include="Sections.cpp" />
     <ClCompile Include="SystemInfo.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Copy.h" />
     <ClInclude Include="Error.h" />
     <ClInclude Include="Nt.h" />
     <ClInclude Include="Pe.h" />
+    <ClInclude Include="Process.h" />
     <ClInclude Include="TypesAndClasses.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

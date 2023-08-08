@@ -22,6 +22,12 @@
     <Filter Include="Header Files\PE\NtUtil">
       <UniqueIdentifier>{a96e140f-efa5-4462-afbd-838d8ce78f09}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\PE\Process">
+      <UniqueIdentifier>{ff2fb20e-34df-42be-bf66-57775df9b49f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\PE\Utils">
+      <UniqueIdentifier>{dbc7aab7-a034-48ba-8119-fcd1f2337594}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Pe-everything.cpp">
@@ -33,12 +39,6 @@
     <ClCompile Include="Files.cpp">
       <Filter>Header Files\PE\PeUtil</Filter>
     </ClCompile>
-    <ClCompile Include="Memory.cpp">
-      <Filter>Header Files\PE\PeUtil</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules.cpp">
-      <Filter>Header Files\PE\PeUtil</Filter>
-    </ClCompile>
     <ClCompile Include="Nt.cpp">
       <Filter>Header Files\PE\NtUtil</Filter>
     </ClCompile>
@@ -48,31 +48,52 @@
     <ClCompile Include="Platform.cpp">
       <Filter>Header Files\PE\NtUtil</Filter>
     </ClCompile>
-    <ClCompile Include="Process.cpp">
-      <Filter>Header Files\PE\PeUtil</Filter>
-    </ClCompile>
     <ClCompile Include="Sections.cpp">
       <Filter>Header Files\PE\NtUtil</Filter>
     </ClCompile>
     <ClCompile Include="SystemInfo.cpp">
       <Filter>Header Files\PE\PeUtil</Filter>
     </ClCompile>
+    <ClCompile Include="Process.cpp">
+      <Filter>Header Files\PE\Process</Filter>
+    </ClCompile>
     <ClCompile Include="Call.cpp">
+      <Filter>Header Files\PE\Process</Filter>
+    </ClCompile>
+    <ClCompile Include="ProcessUtils.cpp">
+      <Filter>Header Files\PE\Process</Filter>
+    </ClCompile>
+    <ClCompile Include="Memory.cpp">
+      <Filter>Header Files\PE\Process</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules.cpp">
+      <Filter>Header Files\PE\Process</Filter>
+    </ClCompile>
+    <ClCompile Include="Read.cpp">
       <Filter>Header Files\PE\PeUtil</Filter>
+    </ClCompile>
+    <ClCompile Include="Copy.cpp">
+      <Filter>Header Files\PE\Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Pe.h">
-      <Filter>Header Files\PE</Filter>
+    <ClInclude Include="Process.h">
+      <Filter>Header Files\PE\Process</Filter>
     </ClInclude>
     <ClInclude Include="Nt.h">
-      <Filter>Header Files\PE</Filter>
+      <Filter>Header Files\PE\NtUtil</Filter>
     </ClInclude>
-    <ClInclude Include="Error.h">
+    <ClInclude Include="Pe.h">
       <Filter>Header Files\PE\PeUtil</Filter>
     </ClInclude>
+    <ClInclude Include="Copy.h">
+      <Filter>Header Files\PE\Utils</Filter>
+    </ClInclude>
     <ClInclude Include="TypesAndClasses.h">
-      <Filter>Header Files\PE</Filter>
+      <Filter>Header Files\PE\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Error.h">
+      <Filter>Header Files\PE\Utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
