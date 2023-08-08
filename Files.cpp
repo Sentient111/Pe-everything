@@ -5,8 +5,8 @@ bool Pe::Get_system_dir(std::string* dir)
 	int dir_name_len = GetSystemDirectoryA(NULL, NULL);
 	if (!dir_name_len)
 	{
-		last_err = GetLastError();
-		error_comment = CREATE_ERROR("failed to get system dir length\n");
+		error->last_err = GetLastError();
+		error->error_comment = CREATE_ERROR("failed to get system dir length\n");
 		return false;
 	}
 
@@ -14,8 +14,8 @@ bool Pe::Get_system_dir(std::string* dir)
 
 	if (!GetSystemDirectoryA(dir_path, dir_name_len))
 	{
-		last_err = GetLastError();
-		error_comment = CREATE_ERROR("Failed to query system root dir\n");
+		error->last_err = GetLastError();
+		error->error_comment = CREATE_ERROR("Failed to query system root dir\n");
 		return false;
 	}
 
@@ -37,8 +37,8 @@ std::string Pe::Get_file_path_from_serial(DWORD volume_serial, UINT64 file_seria
 
 	if (volume_enumerator == INVALID_HANDLE_VALUE || !volume_enumerator)
 	{
-		last_err = GetLastError();
-		error_comment = CREATE_ERROR("failed to get volume enumerator %X\n", GetLastError());
+		error->last_err = GetLastError();
+		error->error_comment = CREATE_ERROR("failed to get volume enumerator %X\n", GetLastError());
 		return "";
 	}
 
@@ -69,8 +69,8 @@ std::string Pe::Get_file_path_from_serial(DWORD volume_serial, UINT64 file_seria
 
 			if (file_handle == INVALID_HANDLE_VALUE)
 			{
-				last_err = GetLastError();
-				error_comment = CREATE_ERROR("Failed to open file by id %X\n", GetLastError());
+				error->last_err = GetLastError();
+				error->error_comment = CREATE_ERROR("Failed to open file by id %X\n", GetLastError());
 				return "";
 			}
 
@@ -78,8 +78,8 @@ std::string Pe::Get_file_path_from_serial(DWORD volume_serial, UINT64 file_seria
 			if (!GetFinalPathNameByHandleA(file_handle, (LPSTR)&file_path, sizeof file_path, FILE_NAME_NORMALIZED | VOLUME_NAME_DOS))
 			{
 				CloseHandle(file_handle);
-				last_err = GetLastError();
-				error_comment = CREATE_ERROR("Failed to get path %X\n", GetLastError());
+				error->last_err = GetLastError();
+				error->error_comment = CREATE_ERROR("Failed to get path %X\n", GetLastError());
 				return "";
 			}
 
@@ -88,8 +88,8 @@ std::string Pe::Get_file_path_from_serial(DWORD volume_serial, UINT64 file_seria
 	} while (FindNextVolumeA(volume_enumerator, curr_volume_name, sizeof curr_volume_name));
 
 	FindVolumeClose(volume_enumerator);
-	last_err = ERROR_FILE_NOT_FOUND;
-	error_comment = CREATE_ERROR("Failed to find file with matching serials: vol %X file %X\n", volume_serial, file_serial);
+	error->last_err = ERROR_FILE_NOT_FOUND;
+	error->error_comment = CREATE_ERROR("Failed to find file with matching serials: vol %X file %X\n", volume_serial, file_serial);
 	return "";
 }
 

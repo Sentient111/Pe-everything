@@ -16,15 +16,15 @@ DWORD Process::Get_pid_by_name(const std::string& name)
 	HANDLE proc_list = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 	if (!proc_list || proc_list == INVALID_HANDLE_VALUE)
 	{
-		error_comment = CREATE_ERROR("invalid snapshot %X\n", GetLastError());
-		last_err = GetLastError();
+		error->error_comment = CREATE_ERROR("invalid snapshot %X\n", GetLastError());
+		error->last_err = GetLastError();
 		return 0;
 	}
 
 	if (!Process32FirstW(proc_list, &current_entry))
 	{
-		error_comment = CREATE_ERROR("no first process %X\n", GetLastError());
-		last_err = GetLastError();
+		error->error_comment = CREATE_ERROR("no first process %X\n", GetLastError());
+		error->last_err = GetLastError();
 
 		CloseHandle(proc_list);
 		return 0;
@@ -41,8 +41,8 @@ DWORD Process::Get_pid_by_name(const std::string& name)
 
 	CloseHandle(proc_list);
 
-	error_comment = CREATE_ERROR("failed to find process\n");
-	last_err = ERROR_PROC_NOT_FOUND;
+	error->error_comment = CREATE_ERROR("failed to find process\n");
+	error->last_err = ERROR_PROC_NOT_FOUND;
 	return 0;
 }
 
@@ -67,8 +67,8 @@ bool Process::Get_address_info(UINT64 addr, OPTIONAL std::string* module_path, O
 		NTSTATUS status = Ud_NtQueryVirtualMemory(process_handle, (PVOID)addr, (WIN32_MEMORY_INFORMATION_CLASS)2, &mapped_file_name, mapped_file_name.MaximumLength, NULL);
 		if (status)
 		{
-			last_err = status;
-			error_comment = CREATE_ERROR("Failed to query virtual memory (NTSTATUS) %X\n", status);
+			error->last_err = status;
+			error->error_comment = CREATE_ERROR("Failed to query virtual memory (NTSTATUS) %X\n", status);
 			return false;
 		}
 
@@ -85,8 +85,8 @@ bool Process::Get_address_info(UINT64 addr, OPTIONAL std::string* module_path, O
 		//blyat
 		if (path.length() == 0)
 		{
-			last_err = ERROR_MOD_NOT_FOUND;
-			error_comment = CREATE_ERROR("no module for address found\n");
+			error->last_err = ERROR_MOD_NOT_FOUND;
+			error->error_comment = CREATE_ERROR("no module for address found\n");
 			return false;
 		}
 			
@@ -96,8 +96,8 @@ bool Process::Get_address_info(UINT64 addr, OPTIONAL std::string* module_path, O
 			mod_base = (UINT64)GetModuleHandleA(path.c_str());
 			if(!mod_base)
 			{
-				last_err = GetLastError();
-				error_comment = CREATE_ERROR("Failed to find module base %X\n", GetLastError());
+				error->last_err = GetLastError();
+				error->error_comment = CREATE_ERROR("Failed to find module base %X\n", GetLastError());
 				return false;
 			}
 		}
@@ -118,8 +118,8 @@ bool Process::Get_drive_path_from_device_path(const std::string& device_path, st
 	static const char device_path_base[] = "\\Device\\HarddiskVolume";
 	if (memcmp(device_path.c_str(), device_path_base, sizeof(device_path_base) - 1))
 	{
-		error_comment = CREATE_ERROR("path is not device path\n");
-		last_err = ERROR_INVALID_NAME;
+		error->error_comment = CREATE_ERROR("path is not device path\n");
+		error->last_err = ERROR_INVALID_NAME;
 		return false;
 	}
 
@@ -127,8 +127,8 @@ bool Process::Get_drive_path_from_device_path(const std::string& device_path, st
 	HANDLE volume_enumerator = FindFirstVolumeA(volume_name, sizeof(volume_name));
 	if (volume_enumerator == INVALID_HANDLE_VALUE)
 	{
-		error_comment = CREATE_ERROR("Failed to enum volumes %X\n", GetLastError());
-		last_err = GetLastError();
+		error->error_comment = CREATE_ERROR("Failed to enum volumes %X\n", GetLastError());
+		error->last_err = GetLastError();
 		return false;
 	}
 
@@ -138,8 +138,8 @@ bool Process::Get_drive_path_from_device_path(const std::string& device_path, st
 		DWORD coverted_path_len = 0;
 		if (!GetVolumePathNamesForVolumeNameA(volume_name, (LPCH)&volume_path, sizeof(volume_name), &coverted_path_len))
 		{
-			error_comment = CREATE_ERROR("Failed to find volume path for volume %s, err %X\n", volume_name, GetLastError());
-			last_err = GetLastError();
+			error->error_comment = CREATE_ERROR("Failed to find volume path for volume %s, err %X\n", volume_name, GetLastError());
+			error->last_err = GetLastError();
 			return false;
 		}
 
@@ -150,8 +150,8 @@ bool Process::Get_drive_path_from_device_path(const std::string& device_path, st
 		DWORD device_path_len = QueryDosDeviceA(volume_path, dos_device_name, sizeof(dos_device_name));
 		if (!device_path_len)
 		{
-			error_comment = CREATE_ERROR("failed to query dos device name for volume %s, err %X\n", volume_path, GetLastError());
-			last_err = GetLastError();
+			error->error_comment = CREATE_ERROR("failed to query dos device name for volume %s, err %X\n", volume_path, GetLastError());
+			error->last_err = GetLastError();
 			return false;
 		}
 
@@ -165,8 +165,8 @@ bool Process::Get_drive_path_from_device_path(const std::string& device_path, st
 	} while (FindNextVolumeA(volume_enumerator, volume_name, sizeof(volume_name)));
 
 
-	last_err = ERROR_PATH_NOT_FOUND;
-	error_comment = CREATE_ERROR("Failed to find volume device in device path %s\n", device_path.c_str());
+	error->last_err = ERROR_PATH_NOT_FOUND;
+	error->error_comment = CREATE_ERROR("Failed to find volume device in device path %s\n", device_path.c_str());
 	FindVolumeClose(volume_enumerator);
 	return false;
 }

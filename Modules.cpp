@@ -8,8 +8,8 @@ bool Process::Get_mod_infoEx(const std::string& module_name, OPTIONAL UINT64* ba
 	DWORD found_mod_size;
 	if (!K32EnumProcessModules(process_handle, mod_list, sizeof(mod_list), &found_mod_size))
 	{
-		last_err = GetLastError();
-		error_comment = CREATE_ERROR("Failed enum process modules %X\n", GetLastError());
+		error->last_err = GetLastError();
+		error->error_comment = CREATE_ERROR("Failed enum process modules %X\n", GetLastError());
 		return false;
 	}
 
@@ -35,7 +35,7 @@ bool Process::Get_mod_infoEx(const std::string& module_name, OPTIONAL UINT64* ba
 		}
 	}
 
-	last_err = ERROR_MOD_NOT_FOUND;
-	error_comment = CREATE_ERROR("Failed to find module\n");
+	error->last_err = ERROR_MOD_NOT_FOUND;
+	error->error_comment = CREATE_ERROR("Failed to find module\n");
 	return false;
 }

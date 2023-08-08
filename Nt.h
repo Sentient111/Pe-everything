@@ -11,7 +11,7 @@ class Pe;
 class Nt
 {
 public:
-	Nt(Pe* executable);
+	Nt(Error_struct* error_handeling, Pe* executable);
 
 	PIMAGE_SECTION_HEADER Get_section_from_address(UINT64 addr);
 	PIMAGE_SECTION_HEADER Get_section(const char* name);
@@ -39,16 +39,12 @@ public:
 	Execution_enviornment Get_execution_enviornment();
 	Subsystem_target Get_subsystem_target();
 
-	DWORD Get_error() { return last_err; };
-	bool Success() { return  Get_error() == ERROR_SUCCESS; };
-	std::string* Get_error_comment() { return &error_comment; };
 	bool Is_32_bit() { return is_32_bit; };
 
 private:
 
 	Pe* pe;
-	DWORD last_err = ERROR_SUCCESS;
-	std::string error_comment = "";
+	Error_struct* error;
 
 	bool is_32_bit;
 	bool is_unmapped;

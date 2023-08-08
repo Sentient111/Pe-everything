@@ -14,8 +14,8 @@ bool Nt::Set_os_platform(UINT64 nt_addr)
 		is_32_bit = false;
 	else
 	{
-		last_err = ERROR_INVALID_EXE_SIGNATURE;
-		error_comment = CREATE_ERROR("os platform has invalid value %X\n", platform);
+		error->last_err = ERROR_INVALID_EXE_SIGNATURE;
+		error->error_comment = CREATE_ERROR("os platform has invalid value %X\n", platform);
 		return false;
 	}
 	return true;
@@ -100,8 +100,8 @@ Execution_enviornment Nt::Get_execution_enviornment()
 
 		default:
 		{
-			last_err = ERROR_INVALID_CATEGORY;
-			error_comment = CREATE_ERROR("Invalid machine type %X\n", machine);
+			error->last_err = ERROR_INVALID_CATEGORY;
+			error->error_comment = CREATE_ERROR("Invalid machine type %X\n", machine);
 			return Execution_enviornment::invalid;
 		}
 	}
@@ -158,8 +158,8 @@ Subsystem_target Nt::Get_subsystem_target()
 
 		default:
 		{
-			last_err = ERROR_INVALID_CATEGORY;
-			error_comment = CREATE_ERROR("invalid subsystem %X\n", subsystem);
+			error->last_err = ERROR_INVALID_CATEGORY;
+			error->error_comment = CREATE_ERROR("invalid subsystem %X\n", subsystem);
 			return Subsystem_target::invalid;
 		}
 	}

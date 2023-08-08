@@ -51,8 +51,8 @@ PIMAGE_SECTION_HEADER Nt::Get_section_from_address(UINT64 addr)
 	}
 
 
-	last_err = ERROR_SECTOR_NOT_FOUND;
-	error_comment = CREATE_ERROR("No section was found for address %X\n", addr);
+	error->last_err = ERROR_SECTOR_NOT_FOUND;
+	error->error_comment = CREATE_ERROR("No section was found for address %X\n", addr);
 	return NULL;
 }
 
@@ -82,8 +82,8 @@ PIMAGE_SECTION_HEADER Nt::Get_section(const char* name)
 	}
 
 
-	last_err = ERROR_SECTOR_NOT_FOUND;
-	error_comment = CREATE_ERROR("No section by name %s was found.\n", name);
+	error->last_err = ERROR_SECTOR_NOT_FOUND;
+	error->error_comment = CREATE_ERROR("No section by name %s was found.\n", name);
 	return NULL;
 }
 

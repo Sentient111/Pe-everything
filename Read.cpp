@@ -21,8 +21,8 @@ UINT64 Pe::Read(UINT64 addr, size_t size)
 				return buff;
 			else
 			{
-				last_err = ERROR_PARTIAL_COPY;
-				error_comment = CREATE_ERROR("only managed to read %i bytes\n", file_stream.gcount());
+				error->last_err = ERROR_PARTIAL_COPY;
+				error->error_comment = CREATE_ERROR("only managed to read %i bytes\n", file_stream.gcount());
 				copies.Destroy_copy(buff);
 				return 0;
 			}
@@ -37,8 +37,8 @@ UINT64 Pe::Read(UINT64 addr, size_t size)
 		case Pe_type::pe_unknown:
 		default:
 		{
-			last_err = ERROR_INVALID_FUNCTION;
-			error_comment = CREATE_ERROR("Read does not currently support drivers or other unknown pe types\n");
+			error->last_err = ERROR_INVALID_FUNCTION;
+			error->error_comment = CREATE_ERROR("Read does not currently support drivers or other unknown pe types\n");
 			return 0;
 		}
 

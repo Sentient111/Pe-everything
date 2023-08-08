@@ -22,7 +22,7 @@
 #endif
 
 #define MAX_QUERY_TRIES 5
-#define RESET_ERR() last_err = ERROR_SUCCESS;error_comment = "";
+#define RESET_ERR() error->last_err = ERROR_SUCCESS;error->error_comment = "";
 #define MAX_STR_READ_LEN 260
 #define File_read(addr, size, buff) file_stream.seekg(addr); file_stream.read((char*)buff, size)
 #define INIT_USTRING(string) string.Buffer = string.str; string.Length = 0; string.MaximumLength = sizeof(string.str);
@@ -31,6 +31,13 @@
 
 
 #pragma region STRUCTS
+
+struct Error_struct
+{
+	DWORD last_err;
+	std::string error_comment;
+	bool Success() { return last_err == ERROR_SUCCESS; };
+};
 
 struct UNICODE_STRING_CUSTOM
 {

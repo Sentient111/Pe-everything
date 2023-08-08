@@ -20,8 +20,8 @@ public:
 	/// 	Pe(driver_name, "", true) = system driver
 	/// 	Pe(volume_serial, file_serial) = file
 	/// </summary>
-	Pe(const std::string& pe_identifier = "", const std::string& owner_process_name = "", bool loaded_driver = false);
-	Pe(DWORD volume_serial, UINT64 file_serial) : Pe(Get_file_path_from_serial(volume_serial, file_serial)) {};
+	Pe(Error_struct* error_handeling, const std::string& pe_identifier = "", const std::string& owner_process_name = "", bool loaded_driver = false);
+	Pe(Error_struct* error_handeling, DWORD volume_serial, UINT64 file_serial) : Pe(error_handeling, Get_file_path_from_serial(volume_serial, file_serial)) {};
 
 	template <typename char_type = char>
 	char_type* Read_string(char_type* addr);
@@ -33,18 +33,14 @@ public:
 #pragma region Getters
 	std::string Get_path() { return source_file_path; };
 	std::string Get_name() { return file_name; };
-	Nt* Get_nt() { if (!nt) nt = new Nt(this); return nt; };
+	Nt* Get_nt() { if (!nt) nt = new Nt(error, this); return nt; };
 	Pe_type Get_pe_type() { return pe_type; };
 	UINT64 Get_real_base() { return base_adress; };
-	DWORD Get_error() { return last_err; };
-	bool Success() { return  Get_error() == ERROR_SUCCESS; };
-	std::string* Get_error_comment() { return &error_comment; };
 #pragma endregion
 
 private:
 
-	DWORD last_err = ERROR_SUCCESS;
-	std::string error_comment = "";
+
 
 	//general info 
 	UINT64 base_adress;
@@ -68,6 +64,7 @@ private:
 	std::string Get_file_path_from_serial(DWORD volume_serial, UINT64 file_serial);
 
 	//extra functionality
+	Error_struct* error;
 	Nt* nt = nullptr;
 	Process* proc = nullptr;
 	CopyContainer copies{};
@@ -100,8 +97,8 @@ char_type* Pe::Read_string(char_type* addr)
 			File_read((UINT64)(addr + i), sizeof(char_type), &curr_char);
 			if (!file_stream)
 			{
-				last_err = ERROR_PARTIAL_COPY;
-				error_comment = CREATE_ERROR("only managed to read %i bytes\n", file_stream.gcount());
+				error->last_err = ERROR_PARTIAL_COPY;
+				error->error_comment = CREATE_ERROR("only managed to read %i bytes\n", file_stream.gcount());
 				return NULL;
 			}
 
@@ -127,8 +124,8 @@ char_type* Pe::Read_string(char_type* addr)
 	case Pe_type::pe_unknown:
 	default:
 	{
-		last_err = ERROR_INVALID_FUNCTION;
-		error_comment = CREATE_ERROR("Read does not currently support drivers or other unknown pe types\n");
+		error->last_err = ERROR_INVALID_FUNCTION;
+		error->error_comment = CREATE_ERROR("Read does not currently support drivers or other unknown pe types\n");
 		return 0;
 	}
 

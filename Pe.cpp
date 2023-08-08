@@ -10,8 +10,8 @@ std::string Pe::Get_full_module_name(const std::string& name)
 	{
 		if (!GetModuleFileNameA(NULL, (LPSTR)&full_module_path, sizeof(full_module_path)))
 		{
-			last_err = GetLastError();
-			error_comment = CREATE_ERROR("Failed to get full path for local process with err %X\n", last_err);
+			error->last_err = GetLastError();
+			error->error_comment = CREATE_ERROR("Failed to get full path for local process with err %X\n", error->last_err);
 			return "";
 		}
 	}
@@ -19,8 +19,8 @@ std::string Pe::Get_full_module_name(const std::string& name)
 	{
 		if (!GetModuleFileNameA(LoadLibraryA(name.c_str()), (LPSTR)&full_module_path, sizeof(full_module_path)))
 		{
-			last_err = GetLastError();
-			error_comment = CREATE_ERROR("Failed to get full path for local module %s with err %X\n", name.c_str(), last_err);
+			error->last_err = GetLastError();
+			error->error_comment = CREATE_ERROR("Failed to get full path for local module %s with err %X\n", name.c_str(), error->last_err);
 			return "";
 		}
 	}
@@ -34,8 +34,8 @@ void Pe::Init_local_pe(const std::string& module_name)
 {
 	pe_type = Pe_type::pe_local;
 
-	proc = new Process();
-	if (!proc->Success()) //copy error from process to Pe
+	proc = new Process(error);
+	if (!error->Success()) //copy error from process to Pe
 		return;
 
 	source_file_path = Get_full_module_name(module_name);
@@ -44,12 +44,12 @@ void Pe::Init_local_pe(const std::string& module_name)
 	base_adress = (UINT64)GetModuleHandleA(module_name.c_str());
 	if (!base_adress)
 	{
-		last_err = GetLastError();
-		error_comment = CREATE_ERROR("failed to get module base for %s, err %X\n", module_name.c_str(), last_err);
+		error->last_err = GetLastError();
+		error->error_comment = CREATE_ERROR("failed to get module base for %s, err %X\n", module_name.c_str(), error->last_err);
 		return;
 	}
 
-	last_err = ERROR_SUCCESS;
+	error->last_err = ERROR_SUCCESS;
 }
 
 void Pe::Init_file_pe(const std::string& file_path)
@@ -62,32 +62,33 @@ void Pe::Init_file_pe(const std::string& file_path)
 	file_stream.open(file_path, std::ios::binary);
 	if (!file_stream.is_open())
 	{
-		last_err = ERROR_FILE_NOT_FOUND;
-		error_comment = CREATE_ERROR("failed to open file stream\n");
+		error->last_err = ERROR_FILE_NOT_FOUND;
+		error->error_comment = CREATE_ERROR("failed to open file stream\n");
 		return;
 	}
 
 	base_adress = 0;
-	last_err = ERROR_SUCCESS;
+	error->last_err = ERROR_SUCCESS;
 }
 
 void Pe::Init_foreign_pe(const std::string& process_name, const std::string& module_name)
 {
 	pe_type = Pe_type::pe_foreign;
 
-	proc = new Process(process_name);
-	if (!proc->Success()) //copy error from process to Pe
+	proc = new Process(error, process_name);
+	if (!error->Success()) //copy error from process to Pe
 		return;
 
 	if (!proc->Get_mod_infoEx(module_name, &base_adress, &source_file_path))
 		return;
 
 	file_name = module_name;
-	last_err = ERROR_SUCCESS;
+	error->last_err = ERROR_SUCCESS;
 }
 
-Pe::Pe(const std::string& pe_identifier, const std::string& owner_process_name, bool loaded_driver)
+Pe::Pe(Error_struct* error_handeling, const std::string& pe_identifier, const std::string& owner_process_name, bool loaded_driver)
 {
+	error = error_handeling;
 	RESET_ERR();
 
 	if (loaded_driver)
@@ -102,7 +103,7 @@ Pe::Pe(const std::string& pe_identifier, const std::string& owner_process_name, 
 		real_base_address = base;
 	}
 
-	if (pe_identifier.length() == 0)
+	if (pe_identifier.length() == 0 && owner_process_name.length() == 0)
 	{
 		std::string local_name = Get_full_module_name("");
 		if (local_name.length() == 0)

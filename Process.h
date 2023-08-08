@@ -6,13 +6,8 @@
 class Process
 {
 public:
-	Process(const OPTIONAL std::string& process_name = "");
+	Process(Error_struct* error_handeling,  const OPTIONAL std::string& process_name = "");
 	~Process() { CloseHandle(process_handle); copies.Free_copies(); }
-
-
-	DWORD Get_error() { return last_err; };
-	bool Success() { return  Get_error() == ERROR_SUCCESS; };
-	std::string* Get_error_comment() { return &error_comment; };
 
 	UINT64 Read(UINT64 addr, size_t size);
 	template <typename char_type>
@@ -22,8 +17,6 @@ public:
 	bool Get_address_info(UINT64 addr, OPTIONAL std::string* module_path, OPTIONAL UINT64* offset);
 
 private:
-	DWORD last_err;
-	std::string error_comment;
 
 	HANDLE process_handle;
 	bool is_32_bit;
@@ -32,6 +25,7 @@ private:
 	std::string process_path;
 	std::string process_name;
 
+	Error_struct* error;
 	CopyContainer copies{};
 
 	bool Get_drive_path_from_device_path(const std::string& device_path, std::string* drive_path);
@@ -72,7 +66,7 @@ char_type* Process::Read_string(char_type* addr)
 		SIZE_T process_read_size = 0;
 		if (!ReadProcessMemory(process_handle, (PVOID)(addr + i), &curr_char, sizeof(char_type), &process_read_size))
 		{
-			last_err = GetLastError();
+			error->last_err = GetLastError();
 			return NULL;
 		}
 		temp_string.push_back(curr_char);

@@ -1,8 +1,9 @@
 #include "Pe.h"
 
 
-Nt::Nt(Pe* executable)
+Nt::Nt(Error_struct* error_handeling, Pe* executable)
 {
+	error = error_handeling;
 	RESET_ERR();
 	pe = executable;
 	real_base = pe->Get_real_base();
@@ -18,8 +19,8 @@ Nt::Nt(Pe* executable)
 	
 	if (dos_header->e_magic != 0x5A4D)
 	{
-		last_err = ERROR_INVALID_EXE_SIGNATURE;
-		error_comment = CREATE_ERROR("dos header has wrong signature. Probably bad image base\n");
+		error->last_err = ERROR_INVALID_EXE_SIGNATURE;
+		error->error_comment = CREATE_ERROR("dos header has wrong signature. Probably bad image base\n");
 		return;
 	}
 
@@ -36,8 +37,8 @@ Nt::Nt(Pe* executable)
 		nt_64_headers = 0;
 		if (nt_32_headers->Signature != 0x50450000)
 		{
-			last_err = ERROR_INVALID_EXE_SIGNATURE;
-			error_comment = CREATE_ERROR("nt headers has wrong signature. Probably bad nt header offset\n");
+			error->last_err = ERROR_INVALID_EXE_SIGNATURE;
+			error->error_comment = CREATE_ERROR("nt headers has wrong signature. Probably bad nt header offset\n");
 			return;
 		}
 	}
@@ -50,8 +51,8 @@ Nt::Nt(Pe* executable)
 		nt_32_headers = 0;
 		if (nt_64_headers->Signature != 0x00004550)
 		{
-			last_err = ERROR_INVALID_EXE_SIGNATURE;
-			error_comment = CREATE_ERROR("nt headers has wrong signature. Probably bad nt header offset\n");
+			error->last_err = ERROR_INVALID_EXE_SIGNATURE;
+			error->error_comment = CREATE_ERROR("nt headers has wrong signature. Probably bad nt header offset\n");
 			return;
 		}
 	}

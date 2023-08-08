@@ -16,8 +16,8 @@ UINT64 Process::Read(UINT64 addr, size_t size)
 	SIZE_T process_read_size = 0;
 	if (!ReadProcessMemory(process_handle, (PVOID)addr, (PVOID)buff, size, &process_read_size))
 	{
-		last_err = GetLastError();
-		error_comment = CREATE_ERROR("Failed to read process memory %X\n", GetLastError());
+		error->last_err = GetLastError();
+		error->error_comment = CREATE_ERROR("Failed to read process memory %X\n", GetLastError());
 		copies.Destroy_copy(buff);
 		return 0;
 	}

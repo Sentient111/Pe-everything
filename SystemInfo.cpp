@@ -47,8 +47,8 @@ bool Pe::Get_driver_info(IN const std::string& name, OPTIONAL std::string* path,
     DWORD err = QuerySystemInformation(SystemModuleInformation, &module_information);
     if (err != ERROR_SUCCESS)
     {
-        last_err = err;
-        error_comment = CREATE_ERROR("Failed to query system module information %X\n", err);
+        error->last_err = err;
+        error->error_comment = CREATE_ERROR("Failed to query system module information %X\n", err);
         return false;
     }
 
@@ -86,7 +86,7 @@ bool Pe::Get_driver_info(IN const std::string& name, OPTIONAL std::string* path,
     }
 
     free(module_information);
-    last_err = ERROR_FILE_NOT_FOUND;
-    error_comment = CREATE_ERROR("Failed to find driver by name %s\n", name.c_str());
+    error->last_err = ERROR_FILE_NOT_FOUND;
+    error->error_comment = CREATE_ERROR("Failed to find driver by name %s\n", name.c_str());
     return false;
 }
