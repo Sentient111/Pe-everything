@@ -33,7 +33,7 @@ bool Nt::Parse_module_imports(Import_module* mod, DWORD function_thunk_ptr, DWOR
 
 			function_thunk_ptr += sizeof(IMAGE_THUNK_DATA32);
 			name_thunk_ptr += sizeof(IMAGE_THUNK_DATA32);
-			function_thunk = (PIMAGE_THUNK_DATA32)pe->Read(Translate_addr(function_thunk_ptr ), sizeof(IMAGE_THUNK_DATA32));
+			function_thunk = (PIMAGE_THUNK_DATA32)pe->Read(Translate_addr(function_thunk_ptr), sizeof(IMAGE_THUNK_DATA32));
 			name_thunk = (PIMAGE_THUNK_DATA32)pe->Read(Translate_addr(name_thunk_ptr), sizeof(IMAGE_THUNK_DATA32));
 			if (!function_thunk || !name_thunk)
 				return false;
@@ -90,7 +90,7 @@ bool Nt::Get_import_dir(Import_info* info)
 
 		if (!Parse_module_imports(&mod_info, import_dir->FirstThunk, import_dir->OriginalFirstThunk))
 			break;
-	
+
 		info->module_list.push_back(mod_info);
 		import_dir = (PIMAGE_IMPORT_DESCRIPTOR)pe->Read(Translate_addr((UINT64)++dir_ptr), sizeof(IMAGE_IMPORT_DESCRIPTOR));
 		if (!import_dir)
@@ -119,7 +119,7 @@ bool Nt::Get_export_dir(Export_info* info)
 	if (!function_table || !ordinal_table || !name_table)
 		return false;
 
-	for (unsigned int i = 0; i < export_dir->NumberOfFunctions; i++) 
+	for (unsigned int i = 0; i < export_dir->NumberOfFunctions; i++)
 	{
 		info->export_count++;
 		char* export_name = pe->Read_string((char*)Translate_addr(name_table[i]));
@@ -162,13 +162,10 @@ bool Nt::Get_reloc_dir(Reloc_info* info)
 
 		for (size_t i = 0; i < curr_reloc_count; i++)
 		{
-			if (curr_reloc_list[i].type == IMAGE_REL_BASED_DIR64)
-			{
-				info->reloc_count++;
-				UINT64 addr_to_relocate = (UINT64)(reloc_dir->VirtualAddress + curr_reloc_list[i].offset); //mby we need to rva this
-				info->relocations.push_back({ addr_to_relocate });
-			}
-
+			info->reloc_count++;
+			UINT64 addr_to_relocate = (UINT64)(reloc_dir->VirtualAddress + curr_reloc_list[i].offset); //mby we need to rva this
+			Relocation_entry entry = { addr_to_relocate, curr_reloc_list[i].type };
+			info->relocations.push_back(entry);
 		}
 
 		reloc_dir_ptr = PIMAGE_DATA_DIRECTORY((UINT64)first_reloc_addr + curr_reloc_count * sizeof(Reloc_entry));

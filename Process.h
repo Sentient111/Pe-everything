@@ -258,6 +258,24 @@ bool Process::Create_call_shellcode(std::vector<BYTE>& shellcode, Calling_covent
 
 	}
 
+
+	//save returned value (in e/rax) to the end of the shellcode allocation (we add the shellcode size to rip to find the end of the shellcode dynamically)
+
+	shellcode.push_back(0x51); //push r/ecx (save r/ecx)
+	if (is_32_bit)
+	{
+		shellcode.push_back(0x8d); shellcode.push_back(0x0d); //mov ecx, [eip+]
+		Encode_value(shellcode, (UINT32)4); //number of following pushes
+		shellcode.push_back(0x89); shellcode.push_back(0x01); //mov [ecx], eax
+	}
+	else
+	{
+		shellcode.push_back(0x48); shellcode.push_back(0x8d); shellcode.push_back(0x0d); //mov rcx, [rip+]
+		Encode_value(shellcode, (UINT64)5); //number of following pushes
+		shellcode.push_back(0x48); shellcode.push_back(0x89); shellcode.push_back(0x01); //mov [rcx], rax
+	}
+	shellcode.push_back(0x59); //pop rcx (restore r/ecx)
+
 	shellcode.push_back(0xC3);//ret
 	return true;
 }

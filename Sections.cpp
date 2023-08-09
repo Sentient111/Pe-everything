@@ -44,7 +44,7 @@ PIMAGE_SECTION_HEADER Nt::Get_section_from_address(UINT64 addr)
 		if (!curr_local_section)
 			return 0;
 
-		if (addr >= curr_local_section->VirtualAddress && addr < curr_local_section->VirtualAddress + curr_local_section->Misc.VirtualSize)
+		if (addr >= curr_local_section->VirtualAddress && addr < curr_local_section->VirtualAddress + curr_local_section->SizeOfRawData)
 			return curr_local_section;
 
 		curr_section_ptr++;

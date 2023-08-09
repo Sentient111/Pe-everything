@@ -37,6 +37,8 @@ public:
 	Process* Get_proc() { return proc; };
 	Pe_type Get_pe_type() { return pe_type; };
 	UINT64 Get_real_base() { return base_adress; };
+	std::ifstream& Get_file_stream() { return file_stream; };
+
 #pragma endregion
 
 private:

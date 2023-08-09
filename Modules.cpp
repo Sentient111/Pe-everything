@@ -3,10 +3,9 @@
 bool Process::Get_mod_infoEx(const std::string& module_name, OPTIONAL UINT64* base, OPTIONAL std::string* path)
 {
 	RESET_ERR();
-
 	HMODULE mod_list[1024];
-	DWORD found_mod_size;
-	if (!K32EnumProcessModules(process_handle, mod_list, sizeof(mod_list), &found_mod_size))
+	DWORD found_mod_size = 0;
+	if (!K32EnumProcessModulesEx(process_handle, mod_list, sizeof(mod_list), &found_mod_size, LIST_MODULES_ALL))
 	{
 		error->last_err = GetLastError();
 		error->error_comment = CREATE_ERROR("Failed enum process modules %X\n", GetLastError());
@@ -21,9 +20,9 @@ bool Process::Get_mod_infoEx(const std::string& module_name, OPTIONAL UINT64* ba
 		{
 			std::string mod_exe_name = curr_mod_name;
 			mod_exe_name = mod_exe_name.substr(mod_exe_name.find_last_of("\\") + 1);
+			printf("%s\n", mod_exe_name.c_str());
 
-
-			if (strcmp(mod_exe_name.c_str(), module_name.c_str()) == 0)
+			if (Str_cmp(mod_exe_name.c_str(), module_name.c_str()))
 			{
 				if (base)
 					*base = (UINT64)mod_list[i];

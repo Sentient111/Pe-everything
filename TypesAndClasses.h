@@ -92,11 +92,16 @@ struct Export_info
 	std::map<std::string, UINT64> export_list;
 };
 
+struct Relocation_entry
+{
+	UINT64 relocation_location;
+	BYTE type;
+};
 
 struct Reloc_info
 {
 	UINT64 reloc_count;
-	std::vector<UINT64> relocations;
+	std::vector<Relocation_entry> relocations;
 };
 
 #pragma endregion

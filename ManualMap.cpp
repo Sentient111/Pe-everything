@@ -2,19 +2,15 @@
 
 UINT64 Nt::Relocate_image(UINT64 new_base)
 {
-	HANDLE file_hanle = CreateFileA(pe->Get_path().c_str(), FILE_ALL_ACCESS, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (!file_hanle || file_hanle == INVALID_HANDLE_VALUE)
-	{
-		error->last_err = GetLastError();
-		error->error_comment = CREATE_ERROR("Failed to open file %s, err %X\n", pe->Get_path().c_str(), GetLastError());
-		return 0;
-	}
+	std::ifstream& fstream = pe->Get_file_stream();
+	fstream.seekg(0, std::ios::end);
+	UINT64 image_size = fstream.tellg();
+	fstream.seekg(0, std::ios::beg);
 
-	UINT64 image_size = 0;
-	if (!GetFileSizeEx(file_hanle, (PLARGE_INTEGER)&image_size))
+	if (0 >= image_size)
 	{
-		error->last_err = GetLastError();
-		error->error_comment = CREATE_ERROR("failed to get file size %X\n", GetLastError());
+		error->last_err = ERROR_FILE_NOT_FOUND;
+		error->error_comment = CREATE_ERROR("failed to get file size\n",);
 		return 0;
 	}
 
@@ -26,10 +22,11 @@ UINT64 Nt::Relocate_image(UINT64 new_base)
 		return 0;
 	}
 
-	if (!ReadFile(file_hanle, (PVOID)file_buffer, image_size, NULL, NULL))
+	fstream.read((char*)file_buffer, image_size);
+	if (!fstream)
 	{
-		error->last_err = GetLastError();
-		error->error_comment = CREATE_ERROR("failed to read file %X\n", GetLastError());
+		error->last_err = ERROR_READ_FAULT;
+		error->error_comment = CREATE_ERROR("failed to read file to buff\n");
 		return 0;
 	}
 
@@ -38,13 +35,41 @@ UINT64 Nt::Relocate_image(UINT64 new_base)
 		return 0;
 
 	UINT64 delta = new_base - Get_virt_base();
-	for (UINT64& curr_reloc : reloc_info.relocations)
+	for (Relocation_entry& curr_reloc : reloc_info.relocations)
 	{
-		UINT64 reloc_addr = file_buffer + curr_reloc;
-		if(is_32_bit)
-			*(UINT32*)reloc_addr += delta;
-		else
-			*(UINT64*)reloc_addr += delta;
+		UINT64* reloc_addr = (UINT64*)(file_buffer + curr_reloc.relocation_location);
+		switch (curr_reloc.type)
+		{
+			case IMAGE_REL_BASED_DIR64:
+			{
+				*reloc_addr += delta;
+				break;
+			}
+
+			case IMAGE_REL_BASED_HIGHLOW:
+			{
+				*reloc_addr = *reloc_addr + (delta & 0xFFFFFFFF);
+				break;
+			}
+
+			case IMAGE_REL_BASED_LOW:
+			{
+				*(USHORT*)reloc_addr = *(USHORT*)reloc_addr + LOWORD(delta & 0xFFFF);
+				break;
+			}
+
+			case IMAGE_REL_BASED_HIGH:
+			{
+				*(USHORT*)reloc_addr = HIWORD(MAKELONG(0, *(USHORT*)reloc_addr) + (delta & 0xFFFFFFFF));
+				break;
+			}
+
+		case IMAGE_REL_BASED_ABSOLUTE:
+		case IMAGE_REL_BASED_HIGHADJ:
+		case IMAGE_REL_BASED_MIPS_JMPADDR:
+		default:
+			break;
+		}
 	}
 
 	return file_buffer;
@@ -60,9 +85,24 @@ bool Nt::Resolve_imports(UINT64 base, Pe* target)
 	{
 		Import_module* mod = &imp_info.module_list[i];
 		Pe* import_mod = target->Get_module(mod->module_name);
-		if (!import_mod)
+		if (!error->Success())
 		{
 			//load with remote load libary call I guess
+
+			Export_info exports = { 0 };
+			if (!target->Get_nt()->Get_export_dir(&exports))
+				return false;
+
+			UINT64 load_lib_addr = exports.export_list["LoadLibraryA"];
+			if (!load_lib_addr)
+				return false;
+
+			UINT64 mod_name = target->Get_proc()->Copy_data((UINT64)mod->module_name.c_str(), mod->module_name.size());
+			if (!mod_name)
+				return false;
+			
+			target->Get_proc()->Call_function<HMODULE>(Calling_covention::call_stdcall, load_lib_addr, mod_name);
+
 			return false;
 		}
 		
