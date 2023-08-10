@@ -4,8 +4,6 @@
 
 UINT64 Pe::Read(UINT64 addr, size_t size)
 {
-
-
 	switch (pe_type)
 	{
 		case Pe_type::pe_file:

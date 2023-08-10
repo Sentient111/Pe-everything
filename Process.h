@@ -134,6 +134,7 @@ Ret_type Process::Call_function(Calling_covention convention, UINT64 addr, Args.
 		{
 			error->last_err = GetLastError();
 			error->error_comment = CREATE_ERROR("Failed to wpm %X\n", GetLastError());
+			VirtualFree(exec, NULL, MEM_RELEASE);
 			return Ret_type{ 0 };
 		}
 
@@ -142,6 +143,7 @@ Ret_type Process::Call_function(Calling_covention convention, UINT64 addr, Args.
 		{
 			error->last_err = GetLastError();
 			error->error_comment = CREATE_ERROR("Failed to create thread %X\n", GetLastError());
+			VirtualFree(exec, NULL, MEM_RELEASE);
 			return Ret_type{ 0 };
 		}
 
@@ -149,10 +151,40 @@ Ret_type Process::Call_function(Calling_covention convention, UINT64 addr, Args.
 		{
 			error->last_err = GetLastError();
 			error->error_comment = CREATE_ERROR("thread failed to execute in time. something went wrong %X\n", GetLastError());
+			VirtualFree(exec, NULL, MEM_RELEASE);
 			return Ret_type{ 0 };
 		}
 
-		VirtualFree(exec, NULL, MEM_RELEASE);
+		if (is_32_bit)
+		{
+			UINT32 ret_val = 0;
+			PVOID ret_val_addr = (PVOID)((UINT64)exec + call_shellcode.size());
+			if (!ReadProcessMemory(process_handle, ret_val_addr, &ret_val, sizeof(UINT32), NULL))
+			{
+				error->last_err = GetLastError();
+				error->error_comment = CREATE_ERROR("Failed to read ret value %X\n", GetLastError());
+				VirtualFree(exec, NULL, MEM_RELEASE);
+				return Ret_type{ 0 };
+			}
+
+			VirtualFree(exec, NULL, MEM_RELEASE);
+			return (Ret_type)ret_val;
+		}
+		else
+		{
+			UINT64 ret_val = 0;
+			PVOID ret_val_addr = (PVOID)((UINT64)exec + call_shellcode.size());
+			if (!ReadProcessMemory(process_handle, ret_val_addr, &ret_val, sizeof(UINT64), NULL))
+			{
+				error->last_err = GetLastError();
+				error->error_comment = CREATE_ERROR("Failed to read ret value %X\n", GetLastError());
+				VirtualFree(exec, NULL, MEM_RELEASE);
+				return Ret_type{ 0 };
+			}
+
+			VirtualFree(exec, NULL, MEM_RELEASE);
+			return (Ret_type)ret_val;
+		}	
 	}
 }
 
@@ -264,14 +296,17 @@ bool Process::Create_call_shellcode(std::vector<BYTE>& shellcode, Calling_covent
 	shellcode.push_back(0x51); //push r/ecx (save r/ecx)
 	if (is_32_bit)
 	{
-		shellcode.push_back(0x8d); shellcode.push_back(0x0d); //mov ecx, [eip+]
-		Encode_value(shellcode, (UINT32)4); //number of following pushes
+		//basically mov ecx, eip (x86 does not support reading of rip so we just dump the ret addr instead
+		shellcode.push_back(0xe8); Encode_value(shellcode, (UINT32)0); //call eip
+		shellcode.push_back(0x59); //pop ecx 
+
+		shellcode.push_back(0x83); shellcode.push_back(0xc1); shellcode.push_back(0x8);//add ecx, offset
 		shellcode.push_back(0x89); shellcode.push_back(0x01); //mov [ecx], eax
 	}
 	else
 	{
 		shellcode.push_back(0x48); shellcode.push_back(0x8d); shellcode.push_back(0x0d); //mov rcx, [rip+]
-		Encode_value(shellcode, (UINT64)5); //number of following pushes
+		Encode_value(shellcode, (UINT32)5); //number of following pushes
 		shellcode.push_back(0x48); shellcode.push_back(0x89); shellcode.push_back(0x01); //mov [rcx], rax
 	}
 	shellcode.push_back(0x59); //pop rcx (restore r/ecx)
