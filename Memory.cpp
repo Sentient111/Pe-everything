@@ -25,10 +25,10 @@ UINT64 Process::Read(UINT64 addr, size_t size)
 }
 
 
-UINT64 Process::Copy_data(UINT64 data, size_t size)
+UINT64 Process::Copy_data(PVOID data, size_t size)
 {
 	if (is_local_context)
-		return data;
+		return (UINT64)data;
 
 	PVOID allocated_mem = VirtualAllocEx(process_handle, NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 	if (!allocated_mem)
@@ -60,7 +60,7 @@ UINT64 Process::Allocate_mem(size_t size, DWORD prot)
 	return base;
 }
 
-bool Process::Copy_data(UINT64 source, UINT64 dest, size_t size)
+bool Process::Copy_data_to_dest(PVOID source, UINT64 dest, size_t size)
 {
 	if (!WriteProcessMemory(process_handle, (PVOID)dest, (PVOID)source, size, NULL))
 	{
@@ -70,4 +70,9 @@ bool Process::Copy_data(UINT64 source, UINT64 dest, size_t size)
 	}
 
 	return true;
+}
+
+void Process::Free_data(UINT64 addr)
+{
+	VirtualFreeEx(process_handle, (PVOID)addr, NULL, MEM_RELEASE);
 }

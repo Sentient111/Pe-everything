@@ -17,9 +17,10 @@ public:
 	bool Get_address_info(UINT64 addr, OPTIONAL std::string* module_path, OPTIONAL UINT64* offset);
 
 
-	UINT64 Copy_data(UINT64 data, size_t size);
-	bool Copy_data(UINT64 source, UINT64 dest, size_t size);
+	UINT64 Copy_data(PVOID data, size_t size);
+	bool Copy_data_to_dest(PVOID source, UINT64 dest, size_t size);
 	UINT64 Allocate_mem(size_t size, DWORD prot);
+	void Free_data(UINT64 addr);
 
 	template <typename Ret_type, typename ...Args>
 	Ret_type Call_function(Calling_covention convention, UINT64 addr, Args... args);
@@ -147,7 +148,7 @@ Ret_type Process::Call_function(Calling_covention convention, UINT64 addr, Args.
 			return Ret_type{ 0 };
 		}
 
-		if (WaitForSingleObject(thread_handle, 1000) != WAIT_OBJECT_0)
+		if (WaitForSingleObject(thread_handle, INFINITE) != WAIT_OBJECT_0)
 		{
 			error->last_err = GetLastError();
 			error->error_comment = CREATE_ERROR("thread failed to execute in time. something went wrong %X\n", GetLastError());

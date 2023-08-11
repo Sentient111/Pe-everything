@@ -87,22 +87,6 @@ bool Nt::Resolve_imports(UINT64 base, Pe* target)
 		Pe* import_mod = target->Get_module(mod->module_name);
 		if (!error->Success())
 		{
-			//load with remote load libary call I guess
-
-			Export_info exports = { 0 };
-			if (!target->Get_nt()->Get_export_dir(&exports))
-				return false;
-
-			UINT64 load_lib_addr = exports.export_list["LoadLibraryA"];
-			if (!load_lib_addr)
-				return false;
-
-			UINT64 mod_name = target->Get_proc()->Copy_data((UINT64)mod->module_name.c_str(), mod->module_name.size());
-			if (!mod_name)
-				return false;
-			
-			target->Get_proc()->Call_function<HMODULE>(Calling_covention::call_stdcall, load_lib_addr, mod_name);
-
 			return false;
 		}
 		
