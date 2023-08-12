@@ -1,11 +1,11 @@
 #pragma once
-#include "Error.h"
-#include "Copy.h"
+#include "..\Util\Error.h"
+#include "..\Util\Copy.h"
 #include <vector>
 
 class Pe;
 
-#include "TypesAndClasses.h"
+#include "..\Util\TypesAndClasses.h"
 
 
 class Nt

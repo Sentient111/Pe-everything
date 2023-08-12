@@ -3,7 +3,7 @@
 #include <tlhelp32.h>
 #include <psapi.h>
 
-#include "Pe.h"
+#include "..\Pe\Pe.h"
 
 DWORD Process::Get_pid_by_name(const std::string& name)
 {

@@ -1,4 +1,4 @@
-#include "Pe.h"
+#include "..\Pe\Pe.h"
 
 bool Process::Get_mod_infoEx(const std::string& module_name, OPTIONAL UINT64* base, OPTIONAL std::string* path)
 {

@@ -1,4 +1,4 @@
-#include "Pe.h"
+#include "..\Pe\Pe.h"
 
 
 UINT64 Nt::Get_dir_ptr(DWORD dir_idx)

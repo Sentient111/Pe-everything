@@ -139,29 +139,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Call.cpp" />
-    <ClCompile Include="Copy.cpp" />
-    <ClCompile Include="Directories.cpp" />
-    <ClCompile Include="Files.cpp" />
-    <ClCompile Include="Memory.cpp" />
-    <ClCompile Include="Modules.cpp" />
-    <ClCompile Include="Nt.cpp" />
     <ClCompile Include="Pe-everything.cpp" />
-    <ClCompile Include="Pe.cpp" />
-    <ClCompile Include="Platform.cpp" />
-    <ClCompile Include="Process.cpp" />
-    <ClCompile Include="ProcessUtils.cpp" />
-    <ClCompile Include="Read.cpp" />
-    <ClCompile Include="Sections.cpp" />
-    <ClCompile Include="SystemInfo.cpp" />
+    <ClCompile Include="Src\Nt\Directories.cpp" />
+    <ClCompile Include="Src\Nt\Nt.cpp" />
+    <ClCompile Include="Src\Nt\Platform.cpp" />
+    <ClCompile Include="Src\Nt\Sections.cpp" />
+    <ClCompile Include="Src\Pe\Files.cpp" />
+    <ClCompile Include="Src\Pe\Pe.cpp" />
+    <ClCompile Include="Src\Pe\Read.cpp" />
+    <ClCompile Include="Src\Proc\Call.cpp" />
+    <ClCompile Include="Src\Proc\Memory.cpp" />
+    <ClCompile Include="Src\Proc\Modules.cpp" />
+    <ClCompile Include="Src\Proc\Process.cpp" />
+    <ClCompile Include="Src\Proc\ProcessUtils.cpp" />
+    <ClCompile Include="Src\Util\Copy.cpp" />
+    <ClCompile Include="Src\Util\SystemInfo.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Copy.h" />
-    <ClInclude Include="Error.h" />
-    <ClInclude Include="Nt.h" />
-    <ClInclude Include="Pe.h" />
-    <ClInclude Include="Process.h" />
-    <ClInclude Include="TypesAndClasses.h" />
+    <ClInclude Include="Src\Nt\Nt.h" />
+    <ClInclude Include="Src\Pe\Pe.h" />
+    <ClInclude Include="Src\Proc\Process.h" />
+    <ClInclude Include="Src\Util\Copy.h" />
+    <ClInclude Include="Src\Util\Error.h" />
+    <ClInclude Include="Src\Util\TypesAndClasses.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

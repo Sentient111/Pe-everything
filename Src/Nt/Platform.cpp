@@ -1,4 +1,4 @@
-#include "Pe.h"
+#include "..\Pe\Pe.h"
 
 bool Nt::Set_os_platform(UINT64 nt_addr)
 {

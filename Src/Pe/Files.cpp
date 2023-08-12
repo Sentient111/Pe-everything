@@ -1,4 +1,4 @@
-#include "Pe.h"
+#include "..\Pe\Pe.h"
 
 bool Pe::Get_system_dir(std::string* dir)
 {

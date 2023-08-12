@@ -1,4 +1,4 @@
-#include "Pe.h"
+#include "..\Pe\Pe.h"
 
 void Process::Encode_value(std::vector<BYTE>& shellcode, UINT32 val)
 {

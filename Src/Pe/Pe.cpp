@@ -1,4 +1,4 @@
-#include "Pe.h"
+#include "..\Pe\Pe.h"
 
 std::string Pe::Get_full_module_name(const std::string& name)
 {

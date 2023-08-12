@@ -1,6 +1,6 @@
 #pragma once
-#include "Nt.h"
-#include "Process.h"
+#include "..\Nt\Nt.h"
+#include "..\Proc\Process.h"
 
 class Pe
 {

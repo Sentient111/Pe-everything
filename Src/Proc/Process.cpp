@@ -1,4 +1,4 @@
-#include "Pe.h"
+#include "..\Pe\Pe.h"
 #include <Winnt.h>
 #include <wow64apiset.h>
 

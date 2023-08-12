@@ -1,4 +1,4 @@
-#include "Pe.h"
+#include "..\Pe\Pe.h"
 
 UINT64 Process::Read(UINT64 addr, size_t size)
 {

@@ -1,4 +1,4 @@
-#include "Pe.h"
+#include "..\Pe\Pe.h"
 
 
 Nt::Nt(Error_struct* error_handeling, Pe* executable)
