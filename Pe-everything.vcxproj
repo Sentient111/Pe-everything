@@ -152,7 +152,6 @@
     <ClCompile Include="Process.cpp" />
     <ClCompile Include="ProcessUtils.cpp" />
     <ClCompile Include="Read.cpp" />
-    <ClCompile Include="ManualMap.cpp" />
     <ClCompile Include="Sections.cpp" />
     <ClCompile Include="SystemInfo.cpp" />
   </ItemGroup>

@@ -57,10 +57,6 @@ public:
 	Subsystem_target Get_subsystem_target();
 
 	bool Is_32_bit() { return is_32_bit; };
-
-	UINT64 Relocate_image(UINT64 new_base);
-	bool Resolve_imports(UINT64 base, Pe* process);
-
 private:
 
 	Pe* pe;
