@@ -3,12 +3,13 @@
 //todo
 /*
 	add bound checks to read/write operations for more robust code
-	rework import/export_info layout
 	fix driver relocs
-	out of bounds checks for read
+ 	improve import/export walking to support only getting a wanted import/export and not the whole dir.
 
+ 	remote call cannot be used without function arguments (blyat)
+  	do some slight changed to error handeling so the error struct has a fixed size between architextures
 
-	deep scan function (only code ignore data and follow complete control flow)
+   	I think targeting a x64 process while being in x86 will cause some problems because no wow64 win api is used (cba to test rn)
 */
 
 bool Remote_load_libary(Error_struct* error, Pe* proc, const std::string& libary)
@@ -79,7 +80,7 @@ int main()
 		return false;
 	}
 
-	UINT64 init_fn = Get_export(bypass, "?Initialize@@YAKK@Z");
+	UINT64 init_fn = Get_export(bypass, "Initialize");
 	if (!error.Success())
 	{
 		printf("Failed to get init %X, comment %s\n", error.last_err, error.error_comment.c_str());
