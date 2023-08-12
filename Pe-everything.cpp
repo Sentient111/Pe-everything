@@ -1,17 +1,5 @@
 #include "Src/Pe/Pe.h"
 
-//todo
-/*
-	add bound checks to read/write operations for more robust code
-	fix driver relocs
- 	improve import/export walking to support only getting a wanted import/export and not the whole dir.
-
- 	remote call cannot be used without function arguments (blyat)
-  	do some slight changed to error handeling so the error struct has a fixed size between architextures
-
-   	I think targeting a x64 process while being in x86 will cause some problems because no wow64 win api is used (cba to test rn)
-*/
-
 bool Remote_load_libary(Error_struct* error, Pe* proc, const std::string& libary)
 {
 	Pe* kernel32_mod = proc->Get_module("Kernel32.dll");
